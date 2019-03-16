@@ -3,4 +3,12 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="forward">#009738</color>
+    <color name="backward">#970000</color>
+    <color name="safe">#a1a1a1</color>
+    <color name="forwardPressed">#00ff5e</color>
+    <color name="backwardPressed">#ff0000</color>
+    <color name="safePressed">#5c5c5c</color>
+    <color name="emergency">#740000</color>
+    <color name="emergencyPressed">#b97373</color>
 </resources>
