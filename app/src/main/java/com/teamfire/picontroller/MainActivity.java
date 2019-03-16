@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
                         if (mHandler == null) return true;
                         mHandler.removeCallbacks(mAction);
                         btn_emergency.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.emergency));
-                        CMD = 0;
                         mHandler = null;
                         break;
                 }
@@ -71,6 +70,15 @@ public class MainActivity extends AppCompatActivity {
                     SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
                     cmd_increase_servo.execute();
                     mHandler.postDelayed(this, 100);
+                }
+            };
+            Runnable mStop = new Runnable() {
+                @Override
+                public void run() {
+                    getIPandPort();
+                    CMD = 0;
+                    SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
+                    cmd_increase_servo.execute();
                 }
             };
         });
@@ -92,7 +100,8 @@ public class MainActivity extends AppCompatActivity {
                         if (mHandler == null) return true;
                         mHandler.removeCallbacks(mAction);
                         btn_up.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.forward));
-                        CMD = 0;
+                        mHandler = new Handler();
+                        mHandler.post(mStop);
                         btn_down.setEnabled(true);
                         mHandler = null;
                         break;
@@ -108,6 +117,15 @@ public class MainActivity extends AppCompatActivity {
                     SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
                     cmd_increase_servo.execute();
                     mHandler.postDelayed(this, 100);
+                }
+            };
+            Runnable mStop = new Runnable() {
+                @Override
+                public void run() {
+                    getIPandPort();
+                    CMD = 0;
+                    SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
+                    cmd_increase_servo.execute();
                 }
             };
         });
@@ -129,7 +147,8 @@ public class MainActivity extends AppCompatActivity {
                         if (mHandler == null) return true;
                         mHandler.removeCallbacks(mAction);
                         btn_down.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.backward));
-                        CMD = 0;
+                        mHandler = new Handler();
+                        mHandler.post(mStop);
                         btn_up.setEnabled(true);
                         mHandler = null;
                         break;
@@ -145,6 +164,15 @@ public class MainActivity extends AppCompatActivity {
                     SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
                     cmd_increase_servo.execute();
                     mHandler.postDelayed(this, 100);
+                }
+            };
+            Runnable mStop = new Runnable() {
+                @Override
+                public void run() {
+                    getIPandPort();
+                    CMD = 0;
+                    SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
+                    cmd_increase_servo.execute();
                 }
             };
         });
@@ -166,7 +194,8 @@ public class MainActivity extends AppCompatActivity {
                         if (mHandler == null) return true;
                         mHandler.removeCallbacks(mAction);
                         btn_right.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.safe));
-                        CMD = 0;
+                        mHandler = new Handler();
+                        mHandler.post(mStop);
                         btn_left.setEnabled(true);
                         mHandler = null;
                         break;
@@ -182,6 +211,15 @@ public class MainActivity extends AppCompatActivity {
                     SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
                     cmd_increase_servo.execute();
                     mHandler.postDelayed(this, 100);
+                }
+            };
+            Runnable mStop = new Runnable() {
+                @Override
+                public void run() {
+                    getIPandPort();
+                    CMD = 0;
+                    SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
+                    cmd_increase_servo.execute();
                 }
             };
         });
@@ -203,7 +241,8 @@ public class MainActivity extends AppCompatActivity {
                         if (mHandler == null) return true;
                         mHandler.removeCallbacks(mAction);
                         btn_left.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.safe));
-                        CMD = 0;
+                        mHandler = new Handler();
+                        mHandler.post(mStop);
                         btn_right.setEnabled(true);
                         mHandler = null;
                         break;
@@ -219,6 +258,15 @@ public class MainActivity extends AppCompatActivity {
                     SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
                     cmd_increase_servo.execute();
                     mHandler.postDelayed(this, 100);
+                }
+            };
+            Runnable mStop = new Runnable() {
+                @Override
+                public void run() {
+                    getIPandPort();
+                    CMD = 0;
+                    SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
+                    cmd_increase_servo.execute();
                 }
             };
         });
