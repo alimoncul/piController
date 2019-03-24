@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import java.io.IOException;
@@ -18,7 +19,8 @@ import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btn_down, btn_up, btn_left, btn_right, btn_emergency;
+    Button btn_down, btn_up, btn_left, btn_right, btn_autodrive;
+    WebView wb_liveFeed;
     EditText ipAddress;
     public static String wifiModuleIP;
     public static int wifiModulePort;
@@ -32,52 +34,10 @@ public class MainActivity extends AppCompatActivity {
         btn_up = findViewById(R.id.btn_up);
         btn_left = findViewById(R.id.btn_left);
         btn_right = findViewById(R.id.btn_right);
-        btn_emergency = findViewById(R.id.btn_emergencyStop);
+        btn_autodrive = findViewById(R.id.btn_autodrive);
+        wb_liveFeed = findViewById(R.id.wb_liveFeed);
         ipAddress = findViewById(R.id.ipAddress);
 
-
-        btn_emergency.setOnTouchListener(new View.OnTouchListener() {
-            private Handler mHandler;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        if (mHandler != null) return true;
-                        mHandler = new Handler();
-                        btn_emergency.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.emergencyPressed));
-                        mHandler.postDelayed(mAction, 50);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        if (mHandler == null) return true;
-                        mHandler.removeCallbacks(mAction);
-                        btn_emergency.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.emergency));
-                        mHandler = null;
-                        break;
-                }
-                return false;
-            }
-
-            Runnable mAction = new Runnable() {
-                @Override
-                public void run() {
-                    getIPandPort();
-                    CMD = 0;
-                    SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
-                    cmd_increase_servo.execute();
-                    mHandler.postDelayed(this, 100);
-                }
-            };
-            Runnable mStop = new Runnable() {
-                @Override
-                public void run() {
-                    getIPandPort();
-                    CMD = 0;
-                    SocketAsyncTask cmd_increase_servo = new SocketAsyncTask();
-                    cmd_increase_servo.execute();
-                }
-            };
-        });
 
         btn_up.setOnTouchListener(new View.OnTouchListener() {
             private Handler mHandler;
