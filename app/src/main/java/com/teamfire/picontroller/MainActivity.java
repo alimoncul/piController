@@ -1,5 +1,6 @@
 package com.teamfire.picontroller;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     Button btn_down, btn_up, btn_left, btn_right, btn_autodrive;
     WebView wb_liveFeed;
     EditText ipAddress;
+    private static final int REQ_CODE = 123;
     public static String wifiModuleIP;
     public static int wifiModulePort;
     public static int CMD;
@@ -225,6 +227,14 @@ public class MainActivity extends AppCompatActivity {
                     cmd_increase_servo.execute();
                 }
             };
+        });
+
+        btn_autodrive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, AutoDriveActivity.class);
+                startActivityForResult(intent, REQ_CODE);
+            }
         });
     }
 
