@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import java.io.IOException;
@@ -20,13 +21,15 @@ import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btn_down, btn_up, btn_left, btn_right, btn_autodrive;
+    Button btn_down, btn_up, btn_left, btn_right, btn_autodrive, btn_camera;
     WebView wb_liveFeed;
     EditText ipAddress;
     private static final int REQ_CODE = 123;
     public static String wifiModuleIP;
     public static int wifiModulePort;
     public static int CMD;
+    public String newUrl;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +40,22 @@ public class MainActivity extends AppCompatActivity {
         btn_left = findViewById(R.id.btn_left);
         btn_right = findViewById(R.id.btn_right);
         btn_autodrive = findViewById(R.id.btn_autodrive);
+        btn_camera = findViewById(R.id.btn_camera);
         wb_liveFeed = findViewById(R.id.wb_liveFeed);
         ipAddress = findViewById(R.id.ipAddress);
 
+        btn_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getIPandPort();
+                wb_liveFeed.getSettings().setJavaScriptEnabled(true);
+                wb_liveFeed.getSettings().setUseWideViewPort(true);
+                wb_liveFeed.getSettings().setLoadWithOverviewMode(true);
+                wb_liveFeed.setWebViewClient(new WebViewClient());
+                newUrl = "http://" + wifiModuleIP + ":8000/index.html";
+                wb_liveFeed.loadData("<iframe src='" + newUrl + "' style='border: 0; width: 100%; height: 100%'></iframe>", "text/html; charset=utf-8", "UTF-8");
+            }
+        });
 
         btn_up.setOnTouchListener(new View.OnTouchListener() {
             private Handler mHandler;
