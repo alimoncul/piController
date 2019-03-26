@@ -1,6 +1,7 @@
 package com.teamfire.picontroller;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -43,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
         btn_camera = findViewById(R.id.btn_camera);
         wb_liveFeed = findViewById(R.id.wb_liveFeed);
         ipAddress = findViewById(R.id.ipAddress);
+        SharedPreferences prefs = getSharedPreferences("IP", MODE_PRIVATE);
+        String lastIPAddress = prefs.getString("IP", null);
+        ipAddress.setText(lastIPAddress);
 
         btn_camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -252,6 +256,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQ_CODE);
             }
         });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SharedPreferences.Editor editor = getSharedPreferences("IP", MODE_PRIVATE).edit();
+        editor.putString("IP", ipAddress.getText().toString());
+        editor.commit();
     }
 
     public void getIPandPort() {
