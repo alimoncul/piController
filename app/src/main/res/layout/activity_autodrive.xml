@@ -7,17 +7,17 @@
     tools:context=".AutoDriveActivity">
 
     <EditText
-        android:id="@+id/ipAddress2"
+        android:id="@+id/ipAddress"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:text="192.168.1.110:2522"
-        app:layout_constraintStart_toStartOf="@+id/textView2"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -40,7 +40,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btn_camera2"
+        android:id="@+id/btn_camera"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="65dp"
         android:layout_height="60dp"
@@ -51,7 +51,7 @@
         app:layout_constraintTop_toTopOf="@+id/btn_manualDrive" />
 
     <WebView
-        android:id="@+id/wb_liveFeed2"
+        android:id="@+id/wb_liveFeed"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -61,7 +61,7 @@
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ipAddress2" />
+        app:layout_constraintTop_toBottomOf="@+id/ipAddress" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"

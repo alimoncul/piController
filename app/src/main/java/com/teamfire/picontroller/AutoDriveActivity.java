@@ -2,6 +2,7 @@ package com.teamfire.picontroller;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -36,10 +37,11 @@ public class AutoDriveActivity extends AppCompatActivity {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         btn_manualDrive = findViewById(R.id.btn_manualDrive);
-        btn_camera = findViewById(R.id.btn_camera2);
-        ipAddress = findViewById(R.id.ipAddress2);
-        wb_liveFeed = findViewById(R.id.wb_liveFeed2);
-
+        btn_camera = findViewById(R.id.btn_camera);
+        ipAddress = findViewById(R.id.ipAddress);
+        wb_liveFeed = findViewById(R.id.wb_liveFeed);
+        SharedPreferences prefs = getSharedPreferences("IP", MODE_PRIVATE);
+        String lastIPAddress = prefs.getString("IP", null);
         ipAddress.setText(getIntent().getStringExtra("IP_ADDRESS"));
 
         btn_camera.setOnClickListener(new View.OnClickListener() {
@@ -103,5 +105,12 @@ public class AutoDriveActivity extends AppCompatActivity {
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         //Configuration.getInstance().save(this, prefs);
         map.onPause();  //needed for compass, my location overlays, v6.0.0 and up
+    }
+
+    protected void onStop() {
+        super.onStop();
+        SharedPreferences.Editor editor = getSharedPreferences("IP", MODE_PRIVATE).edit();
+        editor.putString("IP", ipAddress.getText().toString());
+        editor.commit();
     }
 }
