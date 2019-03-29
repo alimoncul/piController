@@ -253,6 +253,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, AutoDriveActivity.class);
+                intent.putExtra("IP_ADDRESS", ipAddress.getText().toString());
                 startActivityForResult(intent, REQ_CODE);
             }
         });
