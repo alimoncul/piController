@@ -70,16 +70,59 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.5" />
 
+    <EditText
+        android:id="@+id/mapLat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="4dp"
+        android:hint="Latitude"
+        android:maxLines="1"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@id/mapLon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline" />
+
+    <EditText
+        android:id="@+id/mapLon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="8dp"
+        android:maxLines="1"
+        android:textSize="12sp"
+        android:hint="Longitude"
+        app:layout_constraintEnd_toStartOf="@+id/btn_ShowCoordinates"
+        app:layout_constraintStart_toEndOf="@+id/mapLat"
+        app:layout_constraintTop_toTopOf="@+id/mapLat" />
+
+    <Button
+        android:id="@+id/btn_ShowCoordinates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="Show"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/mapLat" />
+
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="4dp"
+        android:layout_height="305dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/guideline" />
+        app:layout_constraintTop_toBottomOf="@+id/mapLat" />
+
+    <Button
+        android:id="@+id/btn_GPS"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="GPS"
+        app:layout_constraintBottom_toBottomOf="@+id/map"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

@@ -27,4 +27,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     implementation 'org.osmdroid:osmdroid-android:6.1.0'
+    implementation 'com.github.MKergall:osmbonuspack:6.6.0'
 }

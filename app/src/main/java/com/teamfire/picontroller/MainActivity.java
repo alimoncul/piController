@@ -1,5 +1,6 @@
 package com.teamfire.picontroller;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -13,6 +14,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
@@ -58,6 +60,15 @@ public class MainActivity extends AppCompatActivity {
                 wb_liveFeed.setWebViewClient(new WebViewClient());
                 newUrl = "http://" + wifiModuleIP + ":8000/index.html";
                 wb_liveFeed.loadData("<iframe src='" + newUrl + "' style='border: 0; width: 100%; height: 100%'></iframe>", "text/html; charset=utf-8", "UTF-8");
+            }
+        });
+
+        btn_autodrive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, AutoDriveActivity.class);
+                intent.putExtra("IP_ADDRESS", ipAddress.getText().toString());
+                startActivityForResult(intent, REQ_CODE);
             }
         });
 
@@ -248,15 +259,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
         });
-
-        btn_autodrive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, AutoDriveActivity.class);
-                intent.putExtra("IP_ADDRESS", ipAddress.getText().toString());
-                startActivityForResult(intent, REQ_CODE);
-            }
-        });
     }
 
     @Override
@@ -265,6 +267,20 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = getSharedPreferences("IP", MODE_PRIVATE).edit();
         editor.putString("IP", ipAddress.getText().toString());
         editor.commit();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case (REQ_CODE): {
+                if (resultCode == Activity.RESULT_OK) {
+                    String newText = data.getStringExtra("IP_ADDRESS_FROM_AUTODRIVE");
+                    ipAddress.setText(newText);
+                }
+                break;
+            }
+        }
     }
 
     public void getIPandPort() {
