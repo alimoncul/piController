@@ -8,7 +8,7 @@
 
     <EditText
         android:id="@+id/ipAddress"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="50dp"
         android:ems="10"
         android:inputType="textPersonName"
@@ -31,8 +31,8 @@
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="75dp"
         android:layout_height="60dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
         android:backgroundTint="@color/colorSecondary"
         android:text="MANUAL DRIVE"
         android:textSize="12dp"
@@ -44,20 +44,22 @@
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="65dp"
         android:layout_height="60dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginTop="8dp"
         android:backgroundTint="@color/colorPrimary"
         android:text="CAMERA"
         android:textSize="10dp"
         app:layout_constraintEnd_toStartOf="@+id/btn_manualDrive"
-        app:layout_constraintTop_toTopOf="@+id/btn_manualDrive" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <WebView
         android:id="@+id/wb_liveFeed"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -74,9 +76,10 @@
         android:id="@+id/mapLat"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="4dp"
         android:hint="Latitude"
+        android:inputType="text"
         android:maxLines="1"
         android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@id/mapLon"
@@ -87,20 +90,23 @@
         android:id="@+id/mapLon"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="2dp"
+        android:hint="Longitude"
+        android:inputType="text"
         android:maxLines="1"
         android:textSize="12sp"
-        android:hint="Longitude"
         app:layout_constraintEnd_toStartOf="@+id/btn_ShowCoordinates"
         app:layout_constraintStart_toEndOf="@+id/mapLat"
         app:layout_constraintTop_toTopOf="@+id/mapLat" />
 
     <Button
         android:id="@+id/btn_ShowCoordinates"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
+        android:backgroundTint="@color/colorShow"
         android:text="Show"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/mapLat" />
@@ -108,19 +114,20 @@
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="wrap_content"
-        android:layout_height="305dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapLat" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_ShowCoordinates" />
 
     <Button
         android:id="@+id/btn_GPS"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:backgroundTint="@color/colorGPS"
         android:text="GPS"
         app:layout_constraintBottom_toBottomOf="@+id/map"
         app:layout_constraintStart_toStartOf="parent" />

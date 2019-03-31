@@ -122,13 +122,15 @@ public class AutoDriveActivity extends AppCompatActivity {
         btn_showCoordinates.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mapLat.getText() != null && mapLon.getText() != null) {
+                try {
                     GeoPoint markerPoint = new GeoPoint(Double.parseDouble(mapLat.getText().toString()), Double.parseDouble(mapLon.getText().toString()));
                     startMarker.setPosition(markerPoint);
                     startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                     startMarker.setTitle("Target location");
                     map.getOverlays().add(startMarker);
                     map.invalidate();
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -165,12 +167,4 @@ public class AutoDriveActivity extends AppCompatActivity {
         //Configuration.getInstance().save(this, prefs);
         map.onPause();  //needed for compass, my location overlays, v6.0.0 and up
     }
-
-    protected void onStop() {
-        super.onStop();
-        SharedPreferences.Editor editor = getSharedPreferences("IP", MODE_PRIVATE).edit();
-        editor.putString("IP", ipAddress.getText().toString());
-        editor.commit();
-    }
-
 }

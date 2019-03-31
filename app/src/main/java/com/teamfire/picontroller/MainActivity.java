@@ -21,7 +21,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-
 public class MainActivity extends AppCompatActivity {
 
     Button btn_down, btn_up, btn_left, btn_right, btn_autodrive, btn_camera;
@@ -32,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     public static int wifiModulePort;
     public static int CMD;
     public String newUrl;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

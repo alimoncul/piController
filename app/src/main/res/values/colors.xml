@@ -14,4 +14,6 @@
     <color name="safePressed">#5c5c5c</color>
     <color name="emergency">#740000</color>
     <color name="emergencyPressed">#b97373</color>
+    <color name="colorShow">#5caf76</color>
+    <color name="colorGPS">#4e72be</color>
 </resources>
