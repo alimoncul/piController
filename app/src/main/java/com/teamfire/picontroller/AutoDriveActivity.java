@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -23,11 +25,18 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+
 public class AutoDriveActivity extends AppCompatActivity {
 
     public static String wifiModuleIP;
     public static int wifiModulePort;
     public String newUrl;
+    private boolean isClientRunning = false;
     Button btn_manualDrive, btn_camera, btn_showCoordinates, btn_GPS;
     WebView wb_liveFeed;
     EditText ipAddress, mapLat, mapLon;
@@ -47,6 +56,9 @@ public class AutoDriveActivity extends AppCompatActivity {
         ipAddress = findViewById(R.id.ipAddress);
         wb_liveFeed = findViewById(R.id.wb_liveFeed);
         ipAddress.setText(getIntent().getStringExtra("IP_ADDRESS"));
+
+        //Thread for GPS communication between Pi and device
+
 
         btn_camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,9 +148,16 @@ public class AutoDriveActivity extends AppCompatActivity {
         btn_GPS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!isClientRunning) {
+                    Log.d("UDP", "onClick: Client running");
+                    new Client().execute();
+                } else {
+                    Log.d("UDP", "onClick: Can't run, already running");
+                }
                 mapController.setCenter(markerPointGPS);
             }
         });
+
     }
 
     public void getIPandPort() {
@@ -173,4 +192,45 @@ public class AutoDriveActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    class Client extends AsyncTask<Void, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            isClientRunning = true;
+        }
+
+        public String doInBackground(Void... params) {
+            String result = null;
+            int port = 11444;
+
+            DatagramSocket clientSocket = null;
+            byte[] receiveData = new byte[32];
+            DatagramPacket packet = new DatagramPacket(receiveData, receiveData.length);
+            try {
+                clientSocket = new DatagramSocket(port);
+                clientSocket.receive(packet);
+                result = new String(packet.getData());
+                Log.d("UDP", "Received :) ");
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            } finally {
+                if (clientSocket != null) {
+                    clientSocket.close();
+                }
+            }
+            return result;
+        }
+
+        public void onPostExecute(String result) {
+            Log.d("UDP", "onPostExecute: bitti");
+            if (result != null) {
+                //createNotify();
+                isClientRunning = false;
+                Log.d("UDPP", "onPostExecute: " + result);
+
+            } else {
+                isClientRunning = false;
+            }
+        }
+    }
 }
