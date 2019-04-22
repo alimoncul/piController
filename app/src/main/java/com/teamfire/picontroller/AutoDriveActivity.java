@@ -15,6 +15,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -26,10 +27,14 @@ import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AutoDriveActivity extends AppCompatActivity {
 
@@ -37,6 +42,7 @@ public class AutoDriveActivity extends AppCompatActivity {
     public static int wifiModulePort;
     public String newUrl;
     private boolean isClientRunning = false;
+    public static int CMD = 99;
     Button btn_manualDrive, btn_camera, btn_showCoordinates, btn_GPS;
     WebView wb_liveFeed;
     EditText ipAddress, mapLat, mapLon;
@@ -56,9 +62,6 @@ public class AutoDriveActivity extends AppCompatActivity {
         ipAddress = findViewById(R.id.ipAddress);
         wb_liveFeed = findViewById(R.id.wb_liveFeed);
         ipAddress.setText(getIntent().getStringExtra("IP_ADDRESS"));
-
-        //Thread for GPS communication between Pi and device
-
 
         btn_camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,19 +97,9 @@ public class AutoDriveActivity extends AppCompatActivity {
 
         //default map view point
         final IMapController mapController = map.getController();
-        mapController.setZoom(9);
+        mapController.setZoom(9.0d);
         final GeoPoint startPoint = new GeoPoint(40.1022, 26.5167);
         mapController.setCenter(startPoint);
-
-        //GPS location marker
-        Marker GPSMarker = new Marker(map);
-        final GeoPoint markerPointGPS = new GeoPoint(40.15311283875724, 26.41108989715576);
-        GPSMarker.setPosition(markerPointGPS);
-        GPSMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        GPSMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.gps_marker));
-        GPSMarker.setTitle("Device Location");
-        map.getOverlays().add(GPSMarker);
-        map.invalidate();
 
         //marker placement
         final Marker startMarker = new Marker(map);
@@ -141,6 +134,10 @@ public class AutoDriveActivity extends AppCompatActivity {
                     startMarker.setTitle("Target location");
                     map.getOverlays().add(startMarker);
                     map.invalidate();
+
+                    getIPandPort();
+                    SendTargetAsyncTask send_targetLocation = new SendTargetAsyncTask();
+                    send_targetLocation.execute();
                 }
             }
         });
@@ -153,11 +150,47 @@ public class AutoDriveActivity extends AppCompatActivity {
                     new Client().execute();
                 } else {
                     Log.d("UDP", "onClick: Can't run, already running");
+                    Toast.makeText(getApplicationContext(), "Reading GPS...", Toast.LENGTH_LONG).show();
                 }
-                mapController.setCenter(markerPointGPS);
             }
         });
 
+    }
+
+    public void setMapView(String result) {
+        //parse the result values
+        String regex = "(.)*(\\d)(.)*";
+        Pattern pattern = Pattern.compile(regex);
+        boolean containsNumber = pattern.matcher(result).matches();
+
+        double lat = 0;
+        double lon = 0;
+        if (containsNumber) {
+            String[] coords = result.split(",");
+            lat = Double.parseDouble(coords[0]);
+            String templon = coords[1];
+            Pattern p = Pattern.compile("\\d*\\.\\d+");
+            Matcher m = p.matcher(templon);
+            while (m.find()) {
+                lon = Double.parseDouble(m.group());
+            }
+
+            final IMapController mapViewController = map.getController();
+            mapViewController.setCenter(new GeoPoint(lat, lon));
+            mapViewController.setZoom(15.0d);
+
+            //add the gps location marker
+            Marker GPSMarker = new Marker(map);
+            final GeoPoint markerPointGPS = new GeoPoint(lat, lon);
+            GPSMarker.setPosition(markerPointGPS);
+            GPSMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            GPSMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.gps_marker));
+            GPSMarker.setTitle("Device Location");
+            map.getOverlays().add(GPSMarker);
+            map.invalidate();
+        } else {
+            Toast.makeText(getApplicationContext(), "Can't read GPS data.", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void getIPandPort() {
@@ -209,7 +242,7 @@ public class AutoDriveActivity extends AppCompatActivity {
                 clientSocket = new DatagramSocket(port);
                 clientSocket.receive(packet);
                 result = new String(packet.getData());
-                Log.d("UDP", "Received :) ");
+//                Log.d("UDP", "Received :) ");
             } catch (Exception e) {
                 e.printStackTrace();
 
@@ -222,15 +255,36 @@ public class AutoDriveActivity extends AppCompatActivity {
         }
 
         public void onPostExecute(String result) {
-            Log.d("UDP", "onPostExecute: bitti");
+//            Log.d("UDP", "onPostExecute: bitti");
             if (result != null) {
                 //createNotify();
                 isClientRunning = false;
                 Log.d("UDPP", "onPostExecute: " + result);
-
+                setMapView(result);
             } else {
                 isClientRunning = false;
             }
+        }
+    }
+
+    public class SendTargetAsyncTask extends AsyncTask<Void, Void, Void> {
+        Socket socket;
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                InetAddress inetAddress = InetAddress.getByName(wifiModuleIP);
+                socket = new java.net.Socket(inetAddress, 10200);
+                PrintStream printStream = new PrintStream(socket.getOutputStream());
+                printStream.print(CMD);
+                printStream.close();
+                socket.close();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 }
