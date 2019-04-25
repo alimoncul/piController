@@ -44,18 +44,18 @@ public class AutoDriveActivity extends AppCompatActivity {
     public String newUrl;
     private boolean isClientRunning = false;
     public static int CMD = 99;
-    public static int UDP_LocationReceivingPort = 11444;
+    public static int UDP_LocationReceivingPort = 11445;
     Button btn_manualDrive, btn_camera, btn_showCoordinates, btn_GPS;
     WebView wb_liveFeed;
     EditText ipAddress, mapLat, mapLon;
     MapView map = null;
+    DatagramSocket ds = null;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_autodrive);
-
         btn_manualDrive = findViewById(R.id.btn_manualDrive);
         btn_camera = findViewById(R.id.btn_camera);
         btn_showCoordinates = findViewById(R.id.btn_ShowCoordinates);
@@ -131,7 +131,7 @@ public class AutoDriveActivity extends AppCompatActivity {
         btn_showCoordinates.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mapLat.getText() != null && mapLon.getText() != null) {
+                try {
                     GeoPoint markerPoint = new GeoPoint(Double.parseDouble(mapLat.getText().toString()), Double.parseDouble(mapLon.getText().toString()));
                     startMarker.setPosition(markerPoint);
                     startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -142,6 +142,8 @@ public class AutoDriveActivity extends AppCompatActivity {
                     getIPandPort();
                     SendTargetAsyncTask send_targetLocation = new SendTargetAsyncTask();
                     send_targetLocation.execute();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -150,10 +152,10 @@ public class AutoDriveActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!isClientRunning) {
-                    Log.d("UDP", "onClick: Reading UDP Packet...");
+                    Log.e("UDP", "onClick: Reading UDP Packet...");
                     receivePiLocation();
                 } else {
-                    Log.d("UDP", "onClick: A Thread already started and not finished.");
+                    Log.e("UDP", "onClick: A Thread already started and not finished.");
                 }
             }
         });
@@ -234,15 +236,15 @@ public class AutoDriveActivity extends AppCompatActivity {
             public void run() {
                 String lText;
                 byte[] lMsg = new byte[16];
-                DatagramSocket ds = null;
                 DatagramPacket dp = new DatagramPacket(lMsg, lMsg.length);
                 try {
                     isClientRunning = true;
                     ds = new DatagramSocket(UDP_LocationReceivingPort);
-                    ds.setSoTimeout(5000);
+                    ds.setSoTimeout(7000);
+                    ds.setReuseAddress(true);
                     ds.receive(dp);
                     lText = new String(dp.getData());
-                    Log.d("UDP", "run: paket alındı!" + lText);
+                    Log.e("UDP", "run: paket alındı!" + lText);
                 } catch (SocketException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
