@@ -45,12 +45,12 @@ public class AutoDriveActivity extends AppCompatActivity {
     private boolean isClientRunning = false;
     public static int CMD = 99;
     public static int UDP_LocationReceivingPort = 11445;
+
     Button btn_manualDrive, btn_camera, btn_showCoordinates, btn_GPS;
     WebView wb_liveFeed;
     EditText ipAddress, mapLat, mapLon;
     MapView map = null;
     DatagramSocket ds = null;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
