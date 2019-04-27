@@ -44,6 +44,7 @@ public class AutoDriveActivity extends AppCompatActivity {
     public String newUrl;
     private boolean isClientRunning = false;
     public static int CMD = 99;
+    public static String targetLocation;
     public static int UDP_LocationReceivingPort = 11445;
 
     Button btn_manualDrive, btn_camera, btn_showCoordinates, btn_GPS;
@@ -51,6 +52,7 @@ public class AutoDriveActivity extends AppCompatActivity {
     EditText ipAddress, mapLat, mapLon;
     MapView map = null;
     DatagramSocket ds = null;
+    String gpsresponse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,8 +142,7 @@ public class AutoDriveActivity extends AppCompatActivity {
                     map.invalidate();
 
                     getIPandPort();
-                    SendTargetAsyncTask send_targetLocation = new SendTargetAsyncTask();
-                    send_targetLocation.execute();
+                    new SendTargetAsyncTask().execute();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -153,7 +154,7 @@ public class AutoDriveActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (!isClientRunning) {
                     Log.e("UDP", "onClick: Reading UDP Packet...");
-                    receivePiLocation();
+                    new ReceivePiLocation().execute();
                 } else {
                     Log.e("UDP", "onClick: A Thread already started and not finished.");
                 }
@@ -162,41 +163,6 @@ public class AutoDriveActivity extends AppCompatActivity {
 
     }
 
-    public void setMapView(String result) {
-        //parse the result values
-        String regex = "(.)*(\\d)(.)*";
-        Pattern pattern = Pattern.compile(regex);
-        boolean containsNumber = pattern.matcher(result).matches();
-
-        double lat = 0;
-        double lon = 0;
-        if (containsNumber) {
-            String[] coords = result.split(",");
-            lat = Double.parseDouble(coords[0]);
-            String templon = coords[1];
-            Pattern p = Pattern.compile("\\d*\\.\\d+");
-            Matcher m = p.matcher(templon);
-            while (m.find()) {
-                lon = Double.parseDouble(m.group());
-            }
-
-            final IMapController mapViewController = map.getController();
-            mapViewController.setCenter(new GeoPoint(lat, lon));
-            mapViewController.setZoom(15.0d);
-
-            //add the gps location marker
-            Marker GPSMarker = new Marker(map);
-            final GeoPoint markerPointGPS = new GeoPoint(lat, lon);
-            GPSMarker.setPosition(markerPointGPS);
-            GPSMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-            GPSMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.gps_marker));
-            GPSMarker.setTitle("Device Location");
-            map.getOverlays().add(GPSMarker);
-            map.invalidate();
-        } else {
-            Toast.makeText(getApplicationContext(), "Can't read GPS data.", Toast.LENGTH_LONG).show();
-        }
-    }
 
     public void getIPandPort() {
         String iPandPort = ipAddress.getText().toString();
@@ -230,45 +196,98 @@ public class AutoDriveActivity extends AppCompatActivity {
         editor.commit();
     }
 
-    private void receivePiLocation() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String lText;
-                byte[] lMsg = new byte[16];
-                DatagramPacket dp = new DatagramPacket(lMsg, lMsg.length);
-                try {
-                    isClientRunning = true;
-                    ds = new DatagramSocket(UDP_LocationReceivingPort);
-                    ds.setSoTimeout(7000);
-                    ds.setReuseAddress(true);
-                    ds.receive(dp);
-                    lText = new String(dp.getData());
-                    Log.e("UDP", "run: paket alındı!" + lText);
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (ds != null) {
-                        ds.close();
-                        isClientRunning = false;
-                    }
+    public void setMapView(String result) {
+        //parse the result values
+        String regex = "(.)*(\\d)(.)*";
+        Pattern pattern = Pattern.compile(regex);
+        try {
+            boolean containsNumber = pattern.matcher(result).matches();
+            double lat = 0;
+            double lon = 0;
+            double header = 0;
+            if (containsNumber) {
+                String[] coords = result.split("/");
+                lat = Double.parseDouble(coords[0]);
+                lon = Double.parseDouble(coords[1]);
+                String tempHeader = coords[2];
+                Pattern p = Pattern.compile("\\d*\\.\\d+");
+                Matcher m = p.matcher(tempHeader);
+                while (m.find()) {
+                    header = Double.parseDouble(m.group());
                 }
+
+                final IMapController mapViewController = map.getController();
+                mapViewController.setCenter(new GeoPoint(lat, lon));
+                mapViewController.setZoom(15.0d);
+
+                //add the gps location marker
+                Marker GPSMarker = new Marker(map);
+                final GeoPoint markerPointGPS = new GeoPoint(lat, lon);
+                GPSMarker.setPosition(markerPointGPS);
+                GPSMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                GPSMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.gps_marker));
+                GPSMarker.setTitle("Device Location");
+                map.getOverlays().add(GPSMarker);
+                map.invalidate();
+            } else {
+                Toast.makeText(getApplicationContext(), "Can't read GPS data.", Toast.LENGTH_LONG).show();
             }
-        }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
     }
 
+    public class ReceivePiLocation extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected void onPreExecute() {
+            isClientRunning = true;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            byte[] lMsg = new byte[64];
+            DatagramPacket dp = new DatagramPacket(lMsg, lMsg.length);
+            try {
+                isClientRunning = true;
+                ds = new DatagramSocket(UDP_LocationReceivingPort);
+                ds.setSoTimeout(7000);
+                ds.setReuseAddress(true);
+                ds.receive(dp);
+                gpsresponse = new String(dp.getData());
+                Log.e("UDP", "run: paket alındı!" + gpsresponse);
+            } catch (SocketException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (ds != null) {
+                    ds.close();
+                    isClientRunning = false;
+                }
+            }
+            return true;
+        }
+
+        protected void onPostExecute(Boolean state) {
+            if (state) {
+                setMapView(gpsresponse);
+            }
+        }
+    }
     public class SendTargetAsyncTask extends AsyncTask<Void, Void, Void> {
         Socket socket;
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                InetAddress inetAddress = InetAddress.getByName(wifiModuleIP);
-                socket = new java.net.Socket(inetAddress, 10200);
+                InetAddress inetAddress = InetAddress.getByName(AutoDriveActivity.wifiModuleIP);
+                socket = new java.net.Socket(inetAddress, 10201);
                 PrintStream printStream = new PrintStream(socket.getOutputStream());
-                printStream.print(CMD);
+                targetLocation = mapLat.getText().toString() + "/" + mapLon.getText().toString();
+                printStream.print(targetLocation);
                 printStream.close();
                 socket.close();
             } catch (UnknownHostException e) {
