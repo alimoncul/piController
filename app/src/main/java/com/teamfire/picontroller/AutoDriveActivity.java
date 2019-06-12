@@ -1,8 +1,10 @@
 package com.teamfire.picontroller;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -15,6 +17,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.osmdroid.api.IMapController;
@@ -33,7 +36,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,23 +45,33 @@ public class AutoDriveActivity extends AppCompatActivity {
     public static int wifiModulePort;
     public String newUrl;
     private boolean isClientRunning = false;
-    public static int CMD = 99;
     public static String targetLocation;
     public static int UDP_LocationReceivingPort = 11445;
-    Button btn_manualDrive, btn_camera, btn_showCoordinates, btn_GPS;
+    Button btn_manualDrive, btn_camera, btn_showCoordinates, btn_GPS, btn_Start;
+    TextView tv_info;
     WebView wb_liveFeed;
     EditText ipAddress, mapLat, mapLon;
     MapView map = null;
     DatagramSocket ds = null;
     String gpsresponse;
 
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            tv_info = findViewById(R.id.tv_info);
+            String msg = intent.getStringExtra("DATA");
+            tv_info.setText(msg);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_autodrive);
+        tv_info = findViewById(R.id.tv_info);
         btn_manualDrive = findViewById(R.id.btn_manualDrive);
         btn_camera = findViewById(R.id.btn_camera);
+        btn_Start = findViewById(R.id.btn_Start);
         btn_showCoordinates = findViewById(R.id.btn_ShowCoordinates);
         btn_GPS = findViewById(R.id.btn_GPS);
         mapLat = findViewById(R.id.mapLat);
@@ -68,6 +80,7 @@ public class AutoDriveActivity extends AppCompatActivity {
         wb_liveFeed = findViewById(R.id.wb_liveFeed);
         ipAddress.setText(getIntent().getStringExtra("IP_ADDRESS"));
 
+        startService(new Intent(AutoDriveActivity.this, StatusService.class));
 
         btn_camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,8 +153,8 @@ public class AutoDriveActivity extends AppCompatActivity {
                     startMarker.setTitle("Target location");
                     map.getOverlays().add(startMarker);
                     map.invalidate();
-
                     getIPandPort();
+                    tv_info.setText("Sending Target Coordinates...");
                     new SendTargetAsyncTask().execute();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -149,20 +162,43 @@ public class AutoDriveActivity extends AppCompatActivity {
             }
         });
 
+        btn_Start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /**
+                 * TO-DO
+                 */
+//                if(//tvinfo==showOkey)
+//                {
+//                    getIPandPort();
+//                    tv_info.setText("Sending GO Command...");
+//                    new SendCommand().execute();
+//                }
+//                else{
+//                    Toast.makeText(getApplicationContext(), "Waiting for [Sending Target Coordinates...]", Toast.LENGTH_LONG).show();
+//                }
+            }
+        });
+
         btn_GPS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!isClientRunning) {
-                    Log.e("UDP", "onClick: Reading UDP Packet...");
                     new ReceivePiLocation().execute();
                 } else {
-                    Log.e("UDP", "onClick: A Thread already started and not finished.");
+                    Toast.makeText(getApplicationContext(), "A Thread already started and not finished.", Toast.LENGTH_LONG).show();
                 }
             }
         });
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter intentFilter = new IntentFilter("com.teamfire.picontroller");
+        registerReceiver(broadcastReceiver, intentFilter);
+    }
 
     public void getIPandPort() {
         String iPandPort = ipAddress.getText().toString();
@@ -191,6 +227,7 @@ public class AutoDriveActivity extends AppCompatActivity {
 
     protected void onStop() {
         super.onStop();
+        unregisterReceiver(broadcastReceiver);
         SharedPreferences.Editor editor = getSharedPreferences("IP", MODE_PRIVATE).edit();
         editor.putString("IP", ipAddress.getText().toString());
         editor.commit();
@@ -257,7 +294,6 @@ public class AutoDriveActivity extends AppCompatActivity {
                 ds.setReuseAddress(true);
                 ds.receive(dp);
                 gpsresponse = new String(dp.getData());
-                Log.e("UDP", "run: paket alındı!" + gpsresponse);
             } catch (SocketException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -277,6 +313,27 @@ public class AutoDriveActivity extends AppCompatActivity {
             }
         }
     }
+
+    public class SendCommand extends AsyncTask<Void, Void, Void> {
+        Socket socket;
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                InetAddress inetAddress = InetAddress.getByName(AutoDriveActivity.wifiModuleIP);
+                socket = new java.net.Socket(inetAddress, 10202);
+                PrintStream printStream = new PrintStream(socket.getOutputStream());
+                String data = "go";
+                printStream.print(data);
+                printStream.close();
+                socket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
     public class SendTargetAsyncTask extends AsyncTask<Void, Void, Void> {
         Socket socket;
 
@@ -290,9 +347,7 @@ public class AutoDriveActivity extends AppCompatActivity {
                 printStream.print(targetLocation);
                 printStream.close();
                 socket.close();
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
