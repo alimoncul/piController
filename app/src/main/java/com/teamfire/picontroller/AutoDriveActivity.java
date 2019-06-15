@@ -11,7 +11,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -146,18 +145,22 @@ public class AutoDriveActivity extends AppCompatActivity {
         btn_showCoordinates.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    GeoPoint markerPoint = new GeoPoint(Double.parseDouble(mapLat.getText().toString()), Double.parseDouble(mapLon.getText().toString()));
-                    startMarker.setPosition(markerPoint);
-                    startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                    startMarker.setTitle("Target location");
-                    map.getOverlays().add(startMarker);
-                    map.invalidate();
-                    getIPandPort();
-                    tv_info.setText("Sending Target Coordinates...");
-                    new SendTargetAsyncTask().execute();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if (tv_info.getText().equals("Vehicle Location Received!")) {
+                    try {
+                        GeoPoint markerPoint = new GeoPoint(Double.parseDouble(mapLat.getText().toString()), Double.parseDouble(mapLon.getText().toString()));
+                        startMarker.setPosition(markerPoint);
+                        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                        startMarker.setTitle("Target location");
+                        map.getOverlays().add(startMarker);
+                        map.invalidate();
+                        getIPandPort();
+                        tv_info.setText("Sending Target Coordinates...");
+                        new SendTarget().execute();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Waiting for [" + tv_info.getText() + "]", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -165,18 +168,14 @@ public class AutoDriveActivity extends AppCompatActivity {
         btn_Start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /**
-                 * TO-DO
-                 */
-//                if(//tvinfo==showOkey)
-//                {
-//                    getIPandPort();
-//                    tv_info.setText("Sending GO Command...");
-//                    new SendCommand().execute();
-//                }
-//                else{
-//                    Toast.makeText(getApplicationContext(), "Waiting for [Sending Target Coordinates...]", Toast.LENGTH_LONG).show();
-//                }
+                if (tv_info.getText().equals("Sending Target Coordinates...OK")) {
+                    getIPandPort();
+                    tv_info.setText("Sending GO Command...");
+                    new SendCommand().execute();
+                } else {
+
+                    Toast.makeText(getApplicationContext(), "Waiting for [" + tv_info.getText() + "]", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -184,6 +183,7 @@ public class AutoDriveActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!isClientRunning) {
+                    Toast.makeText(getApplicationContext(), "Reading GPS Data.", Toast.LENGTH_LONG).show();
                     new ReceivePiLocation().execute();
                 } else {
                     Toast.makeText(getApplicationContext(), "A Thread already started and not finished.", Toast.LENGTH_LONG).show();
@@ -254,8 +254,8 @@ public class AutoDriveActivity extends AppCompatActivity {
                 }
 
                 final IMapController mapViewController = map.getController();
+                mapViewController.setZoom(17.0d);
                 mapViewController.setCenter(new GeoPoint(lat, lon));
-                mapViewController.setZoom(15.0d);
 
                 //add the gps location marker
                 Marker GPSMarker = new Marker(map);
@@ -266,6 +266,7 @@ public class AutoDriveActivity extends AppCompatActivity {
                 GPSMarker.setTitle("Device Location");
                 map.getOverlays().add(GPSMarker);
                 map.invalidate();
+                tv_info.setText("Vehicle Location Received!");
             } else {
                 Toast.makeText(getApplicationContext(), "Can't read GPS data.", Toast.LENGTH_LONG).show();
             }
@@ -334,14 +335,14 @@ public class AutoDriveActivity extends AppCompatActivity {
         }
     }
 
-    public class SendTargetAsyncTask extends AsyncTask<Void, Void, Void> {
+    public class SendTarget extends AsyncTask<Void, Void, Void> {
         Socket socket;
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
                 InetAddress inetAddress = InetAddress.getByName(AutoDriveActivity.wifiModuleIP);
-                socket = new java.net.Socket(inetAddress, 10201);
+                socket = new java.net.Socket(inetAddress, 10255);
                 PrintStream printStream = new PrintStream(socket.getOutputStream());
                 targetLocation = mapLat.getText().toString() + "/" + mapLon.getText().toString();
                 printStream.print(targetLocation);
