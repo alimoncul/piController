@@ -1,5 +1,5 @@
-# piController[WIP]
-### A graduation project developed at Çanakkale 18 March University in 2019.
+# piController
+### A graduation project started developing at Çanakkale Onsekiz Mart University in September 2018. Finished developing at June 2019.
 
 ## Getting Started
 
