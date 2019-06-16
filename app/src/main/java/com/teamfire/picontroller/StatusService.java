@@ -48,6 +48,11 @@ public class StatusService extends IntentService {
                     intService.setAction("com.teamfire.picontroller");
                     intService.putExtra("DATA", "Waiting for vehicle location...");
                     sendBroadcast(intService);
+                } else if (message.contains("ARRIVED")) {
+                    Intent intService = new Intent();
+                    intService.setAction("com.teamfire.picontroller");
+                    intService.putExtra("DATA", "Vehicle arrived to target location.");
+                    sendBroadcast(intService);
                 }
             }
         } catch (Exception e) {
