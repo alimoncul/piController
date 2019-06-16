@@ -44,6 +44,7 @@ public class AutoDriveActivity extends AppCompatActivity {
     public static int wifiModulePort;
     public String newUrl;
     private boolean isClientRunning = false;
+    private boolean isGPSMarkerShown = false;
     public static String targetLocation;
     public static int UDP_LocationReceivingPort = 11445;
     Button btn_manualDrive, btn_camera, btn_showCoordinates, btn_GPS, btn_Start;
@@ -115,8 +116,8 @@ public class AutoDriveActivity extends AppCompatActivity {
 
         //default map view point
         final IMapController mapController = map.getController();
-        mapController.setZoom(9.0d);
-        final GeoPoint startPoint = new GeoPoint(40.1022, 26.5167);
+        mapController.setZoom(13.0d);
+        final GeoPoint startPoint = new GeoPoint(40.149985, 26.402691);
         mapController.setCenter(startPoint);
 
         //marker placement
@@ -145,7 +146,7 @@ public class AutoDriveActivity extends AppCompatActivity {
         btn_showCoordinates.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (tv_info.getText().equals("Vehicle Location Received!")) {
+                if (tv_info.getText().equals("Vehicle location received!")) {
                     try {
                         GeoPoint markerPoint = new GeoPoint(Double.parseDouble(mapLat.getText().toString()), Double.parseDouble(mapLon.getText().toString()));
                         startMarker.setPosition(markerPoint);
@@ -154,7 +155,7 @@ public class AutoDriveActivity extends AppCompatActivity {
                         map.getOverlays().add(startMarker);
                         map.invalidate();
                         getIPandPort();
-                        tv_info.setText("Sending Target Coordinates...");
+                        tv_info.setText("Sending target coordinates...");
                         new SendTarget().execute();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -168,9 +169,9 @@ public class AutoDriveActivity extends AppCompatActivity {
         btn_Start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (tv_info.getText().equals("Sending Target Coordinates...OK")) {
+                if (tv_info.getText().equals("Sending target coordinates...OK")) {
                     getIPandPort();
-                    tv_info.setText("Sending GO Command...");
+                    tv_info.setText("Sending GO command...");
                     new SendCommand().execute();
                 } else {
 
@@ -254,7 +255,7 @@ public class AutoDriveActivity extends AppCompatActivity {
                 }
 
                 final IMapController mapViewController = map.getController();
-                mapViewController.setZoom(17.0d);
+                mapViewController.setZoom(18.5d);
                 mapViewController.setCenter(new GeoPoint(lat, lon));
 
                 //add the gps location marker
@@ -264,9 +265,16 @@ public class AutoDriveActivity extends AppCompatActivity {
                 GPSMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
                 GPSMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.gps_marker));
                 GPSMarker.setTitle("Device Location");
-                map.getOverlays().add(GPSMarker);
-                map.invalidate();
-                tv_info.setText("Vehicle Location Received!");
+                if (isGPSMarkerShown) {
+                    map.getOverlays().set(1, GPSMarker);
+                    map.invalidate();
+                } else {
+                    map.getOverlays().add(1, GPSMarker);
+                    map.invalidate();
+                    isGPSMarkerShown = true;
+                }
+
+                tv_info.setText("Vehicle location received!");
             } else {
                 Toast.makeText(getApplicationContext(), "Can't read GPS data.", Toast.LENGTH_LONG).show();
             }
