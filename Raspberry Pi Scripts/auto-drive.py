@@ -171,6 +171,7 @@ while True:
                 distance=calculateDistance(getVehicleLocation(), targetLocation)
                 if(distance<5):
                     emergencyStop()
+		    sendStatus("ARRIVED")
                     break
             time.sleep(5)
             sendStatus("READY")
